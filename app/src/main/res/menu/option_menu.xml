@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/categorybutun"
+        android:title="並べ替え"
+        android:orderInCategory="0"
+        app:showAsAction="always"
+        android:icon="@drawable/sorts"
+        android:scaleType="fitXY"/>
+    <item
+        android:id="@+id/sherebutun"
+        android:title="Shere"
+        android:orderInCategory="1"
+        app:showAsAction="always"
+        android:icon="@drawable/shere1"/>
+
+
+</menu>
