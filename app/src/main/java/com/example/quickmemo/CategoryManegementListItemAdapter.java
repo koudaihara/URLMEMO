@@ -48,32 +48,32 @@ public class CategoryManegementListItemAdapter extends BaseAdapter {
         ((TextView)convertView.findViewById(R.id.CategoryName)).setText(categoryManegementListItem.getCategoryName());
         int resouceId = Integer.parseInt(categoryManegementListItem.getCategoryColor());
         switch (resouceId) {
-            case R.id.Black:
-                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(0, 0, 0));
-                break;
-            case R.id.Blue:
-                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(0, 0, 255));
-                break;
-            case R.id.Green:
-                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(0, 128, 0));
-                break;
-            case R.id.Orange:
-                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(255, 165, 0));
-                break;
-            case R.id.Purple:
-                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(128, 0, 128));
-                break;
-            case R.id.Red:
-                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(255, 0, 0));
-                break;
-            case R.id.Silver:
-                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(192, 192, 192));
-                break;
-            case R.id.Yellow:
+            case 1:
                 convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(255, 255, 0));
                 break;
-            case R.id.Pink:
+            case 2:
+                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(255, 165, 0));
+                break;
+            case 3:
                 convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(255, 192, 203));
+                break;
+            case 4:
+                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(255, 0, 0));
+                break;
+            case 5:
+                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(0, 128, 0));
+                break;
+            case 6:
+                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(0, 0, 255));
+                break;
+            case 7:
+                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(128, 0, 128));
+                break;
+            case 8:
+                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(192, 192, 192));
+                break;
+            case 9:
+                convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(0, 0, 0));
                 break;
 
         }

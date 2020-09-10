@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
+import com.example.quickmemo.R;
+
 public class CategoryColorRadiogroupListener {
 
 

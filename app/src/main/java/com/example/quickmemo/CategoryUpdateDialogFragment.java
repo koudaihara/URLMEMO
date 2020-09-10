@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -67,7 +66,7 @@ public class CategoryUpdateDialogFragment extends DialogFragment {
 
         //updatedialogのEdittext,RadioGroupに初期値を設定
         dialogCategoryName.setText(beforeCategoryName);
-        int resoceRadioButtonId = Integer.parseInt(beforeCategoryColor);
+        int resoceRadioButtonId = new DataConverter().categoryColortoRadioButtonIdConverter(beforeCategoryColor);
         dialogCategoryColorgroup.check(resoceRadioButtonId);
         RadioButton radio = dialogCategoryColorgroup.findViewById(resoceRadioButtonId);
         CategoryColorRadiogroupListener categoryColorRadiogroupListener = new CategoryColorRadiogroupListener();
@@ -121,8 +120,8 @@ public class CategoryUpdateDialogFragment extends DialogFragment {
                     try {
                         ///onUpdateメソッド呼び出し
                         dbAccess.updateCategoryData(helper,updateCategoryName,updateCategoryColor,"CategoryName = ?",beforeCategoryName);
-                        Toast.makeText(getActivity(), "Category Updated", Toast.LENGTH_SHORT)
-                                .show();
+                        dbAccess.updateItemDataOnCategoryName(helper,null,null,updateCategoryName,"CategoryName = ?",beforeCategoryName);
+                        Toast.makeText(getActivity(), "Category Updated", Toast.LENGTH_SHORT).show();
                     }catch (SQLException e){
                         Toast.makeText(getActivity(), String.format("%s is Already exists!!", updateCategoryName),Toast.LENGTH_LONG).show();
                     }

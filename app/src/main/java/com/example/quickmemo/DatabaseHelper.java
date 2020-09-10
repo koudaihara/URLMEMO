@@ -17,7 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     static final private int VERSION = 1;
 
     //コンストラクター
-    DatabaseHelper(Context context){
+    public DatabaseHelper(Context context){
         super(context,DBNAME,null, VERSION);
     }
 

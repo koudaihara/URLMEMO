@@ -1,5 +1,6 @@
 package com.example.quickmemo;
 
+import android.app.SearchManager;
 import android.content.Intent;
 import android.database.SQLException;
 import android.os.Build;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,13 +42,15 @@ public class ItemUpdateActivity extends AppCompatActivity {
         intentItemUrl = subIntent.getStringExtra("intentItemUrl");
         //Toast.makeText(this, String.format("こんにちは、%sさん！", intentItemUrl),Toast.LENGTH_SHORT).show();
         try{
-            //onselectdataを呼び出し、itemNameが全権格納されたArrayListを取得
-            ArrayList<String> itemNameAllData = dbAccess.selectItemData(helper,"ItemData","ItemName",null,null);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_single_choice, itemNameAllData);
+            //selectdataを呼び出し、ItemDataが全件格納されたArrayListを取得
+            ArrayList<ItemData> allItemData = dbAccess.selectItemAllData(helper);
+            ArrayList<ItemManegementListItem> itemManegementListItems = new ArrayList<ItemManegementListItem>();
+            itemManegementListItems = new DataConverter().ItemManegementListItemConverter(allItemData);
+            ItemManegementListItemAdapter itemListAdapter = new ItemManegementListItemAdapter(this,itemManegementListItems, R.layout.itemmanegementlistitem);
             //setAdapterを呼び出し、リストビューにアダプターをセットする
-            choicewordlist.setAdapter(adapter);
+            choicewordlist.setAdapter(itemListAdapter);
         }catch (
-        SQLException e){
+                SQLException e){
             Toast.makeText(this, "An error occurred!!", Toast.LENGTH_LONG)
                     .show();
         }
@@ -56,14 +60,27 @@ public class ItemUpdateActivity extends AppCompatActivity {
         //リストビュー押下時のリスナーを登録
         choicewordlist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                //選択されたリストビューの文字列を取得
+                TextView itemNameTextView = ((TextView) ((LinearLayout) view).findViewById(R.id.ItemName));
+                String itemName = itemNameTextView.getText().toString();
+                //TextView itemUrlTextView = ((TextView) ((LinearLayout) view).findViewById(R.id.ItemUrl));
+                //String itemUrl = itemUrlTextView.getText().toString();
+                TextView categoryNameTextView = ((TextView) ((LinearLayout) view).findViewById(R.id.CategoryName));
+                String categoryName = categoryNameTextView.getText().toString();
                 //選択されたリストビューのitemname文字列を取得
                 Bundle arg = new Bundle();
-                arg.putString("beforeItemName",(String)((TextView) view).getText());
-                arg.putString("beforeItemUrl", intentItemUrl);
-                //ダイアログ「UpdateDialogFragment」を生成
-                DialogFragment dialog = new ItemUpdateDialogFragment(false);
+                arg.putString("beforeItemName",itemName);
+                arg.putString("beforeItemUrl",intentItemUrl);
+                arg.putString("beforeCategoryName",categoryName);
+                //選択されたリストビューのカテゴリーを取得
+                //ダイアログのスピナーを設定
+
+
+                //ダイアログ「AddDialogFragment」を生成
+                DialogFragment dialog = new ItemUpdateDialogFragment(true);
                 dialog.setArguments(arg);
-                //ダイアログ「「UpdateDialogFragment」を表示
+                //ダイアログ「「AddDialogFragment」を表示
                 dialog.show(getSupportFragmentManager(), "");
 
             }

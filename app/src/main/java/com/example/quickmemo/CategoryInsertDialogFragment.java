@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.SQLException;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -87,8 +85,8 @@ public class CategoryInsertDialogFragment extends DialogFragment {
                 //ダイアログに入力されているCategotyNameを取得
                 String insertCategoryName = dialogCategoryName.getText().toString();
                 //ダイアログに入力されているCategoryColorのIdを取得
-                int CategoryColorId = dialogCategoryColorgroup.getCheckedRadioButtonId();
-                String insertCategoryColor = Integer.toString(CategoryColorId);
+                int categoryColorId = dialogCategoryColorgroup.getCheckedRadioButtonId();
+                String insertCategoryColor = new DataConverter().radioIdtoCategoryColorConverter(categoryColorId);
 
                 // String insertCategoryColor = dialogCategoryColor.getSelectedItem().toString();
                 if(insertCategoryName.length() != 0){

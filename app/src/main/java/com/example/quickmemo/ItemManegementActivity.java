@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
 import android.app.SearchManager;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
@@ -26,7 +25,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 public class ItemManegementActivity extends AppCompatActivity {
 
@@ -36,6 +34,7 @@ public class ItemManegementActivity extends AppCompatActivity {
      *
      */
     DatabaseHelper helper = null;
+    DataConverter dataConverter = null;
     DbAccess dbAccess = null;
     String itemName = "ItemName";
     String itemUrl = "ItemUrl";
@@ -92,26 +91,31 @@ public class ItemManegementActivity extends AppCompatActivity {
         ArrayAdapter<String> categorySpinnerAdapter = null;
         final ArrayAdapter<String> dialogcategorySpinnerAdapter = null;
 
+        /**
+         * DBに値がない場合カテゴリーにCategoryName""CategoryColor0を追加
+         */
+        try{
+            //selectdataを呼び出し、  CategoryNameが全件格納されたArrayListを取得
+            ArrayList<String> categoryNameAllData = dbAccess.selectData(helper,"CategoryData",categoryName,null,null);
+            if(categoryNameAllData.size()==0){
+
+                dbAccess.insertDelaultCategoryData(helper);
+
+            }
+
+        }catch (SQLException e){
+            Toast.makeText(this, "An error occurred!!", Toast.LENGTH_LONG).show();
+        }
+
 
         /**
          * アイテム表示用ListViewにアダプターをセットする
          */
         try{
-            //selectdataを呼び出し、itemNameが全権格納されたArrayListを取得し、ItemManegementListItemの配列に格納
-            ArrayList<ItemData> itemNameAllData = dbAccess.selectItemAllData(helper);
+            //selectdataを呼び出し、ItemDataが全件格納されたArrayListを取得
+            ArrayList<ItemData> allItemData = dbAccess.selectItemAllData(helper);
             ArrayList<ItemManegementListItem> itemManegementListItems = new ArrayList<ItemManegementListItem>();
-            for(int i = 0 ; i < itemNameAllData.size() ; i++){
-
-                ItemManegementListItem itemManegementListItem = new ItemManegementListItem();
-                itemManegementListItem.setId((new Random()).nextLong());
-                itemManegementListItem.setItemName(itemNameAllData.get(i).getItemName());
-                itemManegementListItem.setItemUrl(itemNameAllData.get(i).getItemUrl());
-                itemManegementListItem.setCategoryName(itemNameAllData.get(i).getCategoryName());
-                itemManegementListItem.setCategoryColor(itemNameAllData.get(i).getCategoryColor());
-                itemManegementListItems.add(itemManegementListItem);
-
-            }
-
+            itemManegementListItems = new DataConverter().ItemManegementListItemConverter(allItemData);
             itemListAdapter = new ItemManegementListItemAdapter(this,itemManegementListItems, R.layout.itemmanegementlistitem);
             //setAdapterを呼び出し、リストビューにアダプターをセットする
             itemList.setAdapter(itemListAdapter);
@@ -125,17 +129,21 @@ public class ItemManegementActivity extends AppCompatActivity {
          * 検索用Spinnerにアダプターをセットする
          */
         try{
-            //selectdataを呼び出し、  CategoryNameが全権格納されたArrayListを取得
-            ArrayList<String> categoryNameAllData = dbAccess.selectItemData(helper,"CategoryData",categoryName,null,null);
-            //初期表示は空文字。検索時に%に置換する。
-            categoryNameAllData.add(0,"");
+            //selectdataを呼び出し、  CategoryNameが全件格納されたArrayListを取得
+            ArrayList<CategoryData> categoryAllData = dbAccess.selectCategoryAllData(helper);
+            ArrayList<String> categoryNameAllData = new ArrayList<String>();
+            for(CategoryData categoryData : categoryAllData){
+
+                String categoryName = categoryData.getCategoryName();
+                categoryNameAllData.add(categoryName);
+
+            }
+            //categoryNameAllData.add(0,"");
             categorySpinnerAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, categoryNameAllData);
             //setAdapterを呼び出し、スピナーにアダプターをセットする
             serchCategoryNameSpinner.setAdapter(categorySpinnerAdapter);
-        }catch (
-                SQLException e){
-            Toast.makeText(this, "An error occurred!!", Toast.LENGTH_LONG)
-                    .show();
+        }catch (SQLException e){
+            Toast.makeText(this, "An error occurred!!", Toast.LENGTH_LONG).show();
         }
 
 
@@ -149,7 +157,7 @@ public class ItemManegementActivity extends AppCompatActivity {
                 String serchItemUrl = null;
                 TextView itemNameTextView = ((TextView) ((LinearLayout) view).findViewById(R.id.ItemName));
                 String itemName = itemNameTextView.getText().toString();
-                ArrayList<String> itemUrlData = dbAccess.selectItemData(helper,"ItemData",itemUrl,"ItemName = ?",new String[]{itemName});
+                ArrayList<String> itemUrlData = dbAccess.selectData(helper,"ItemData",itemUrl,"ItemName = ?",new String[]{itemName});
                 //DBから取得したitemUrlが空文字か判断する
                 if(itemUrlData.get(0).equals("")){
 
@@ -206,6 +214,7 @@ public class ItemManegementActivity extends AppCompatActivity {
 
         /**
          *検索用EditTextにイベントを設定
+         * キーボードのエンターキーで検索実行
          */
         //キーボード表示を制御するためのオブジェクト
         final InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -246,7 +255,12 @@ public class ItemManegementActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.option_menu,menu);
         return true;
     }
-    //メニューを選択時の制御
+
+
+
+    /**
+     *画面遷移ボタン制御
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
@@ -289,13 +303,21 @@ public class ItemManegementActivity extends AppCompatActivity {
         EditText searchItemNameEdit = findViewById(R.id.searchitemname);
         Spinner searchCategorySpinner = findViewById(R.id.searchcategoryname);
         String searchItemName = "%" + searchItemNameEdit.getText().toString() + "%";
-        //String searchCategoryName = searchCategorySpinner.getSelectedItem().toString();
+        String searchCategoryName = searchCategorySpinner.getSelectedItem().toString();
+        if(searchCategoryName.equals("")){
+            searchCategoryName = "%%";
+        }
 
         //選択されたリストビューのItemNameを条件に、DBからItemUrlを取得する
-        ArrayList<String> searchItemData = dbAccess.selectItemData(helper,"ItemData",itemName,"ItemName like ?",new String[]{searchItemName});
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchItemData);
+        ArrayList<ItemData> searchItemDatas = dbAccess.selectItemData(helper,searchCategoryName,searchItemName);
+        ArrayList<ItemManegementListItem> serchItemManegementListItems = new DataConverter().ItemManegementListItemConverter(searchItemDatas);
+        ItemManegementListItemAdapter serchItemListAdapter = new ItemManegementListItemAdapter(this,serchItemManegementListItems, R.layout.itemmanegementlistitem);
         //setAdapterを呼び出し、リストビューにアダプターをセットする
-        itemList.setAdapter(adapter);
+        itemList.setAdapter(serchItemListAdapter);
+
+        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchItemData);
+        //setAdapterを呼び出し、リストビューにアダプターをセットする
+        //itemList.setAdapter(adapter);
 
     }
 
@@ -309,11 +331,11 @@ public class ItemManegementActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void serchClear(View view){
-        //ワイルドカードでItemName全件をDBから取得し、表示する
-        String searchItemName = "%";
-        ArrayList<String> searchItemData = dbAccess.selectItemData(helper,"ItemData",itemName,"ItemName like ?",new String[]{searchItemName});
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchItemData);
-        itemList.setAdapter(adapter);
+        ArrayList<ItemData> itemNameAllData = dbAccess.selectItemAllData(helper);
+        ArrayList<ItemManegementListItem> itemManegementListItems = new ArrayList<ItemManegementListItem>();
+        itemManegementListItems = new DataConverter().ItemManegementListItemConverter(itemNameAllData);
+        ItemManegementListItemAdapter itemListAdapter = new ItemManegementListItemAdapter(this,itemManegementListItems, R.layout.itemmanegementlistitem);
+        itemList.setAdapter(itemListAdapter);
         //検索テキストボックスの入力値を削除する
         serchItemNameEditText.getEditableText().clear();
         serchCategoryNameSpinner.setSelection(0);

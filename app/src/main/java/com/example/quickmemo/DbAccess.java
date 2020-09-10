@@ -1,15 +1,14 @@
 package com.example.quickmemo;
 
-import android.content.ClipData;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+
+import com.example.quickmemo.CategoryData;
 
 import java.util.ArrayList;
 
@@ -22,7 +21,7 @@ public class DbAccess {
      *
      */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public ArrayList<String> selectItemData(DatabaseHelper helper, String table, String column, String selection, String[] selectionArgs) throws SQLException{
+    public ArrayList<String> selectData(DatabaseHelper helper, String table, String column, String selection, String[] selectionArgs) throws SQLException{
 
         //Adapter初期化
         ArrayList<String> data = new ArrayList<>();
@@ -50,9 +49,9 @@ public class DbAccess {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public ArrayList<ItemData> selectItemAllData(DatabaseHelper helper) throws SQLException{
 
-        //Adapter初期化
+        //Arraylist初期化
         ArrayList<ItemData> itemDataArrayList = new ArrayList<>();
-        String sql = "SELECT * FROM ItemData LEFT OUTER JOIN CategoryData ON ItemData.CategoryName = CategoryData.CategoryName";
+        String sql = "SELECT * FROM ItemData LEFT OUTER JOIN CategoryData ON ItemData.CategoryName = CategoryData.CategoryName ORDER BY CategoryData.CategoryColor ASC";
 
 
         //データベースから登録済みのアイテムを取得し、メイン画面に表示する
@@ -61,6 +60,37 @@ public class DbAccess {
              //db.query(取得するテーブル名,取得するカラム名,条件,条件に設定する値)
              //Cursor cs = db.query("CategoryData", null, "CategoryName = ", null, null, null, null, null)) {
             Cursor cs = db.rawQuery(sql,null)){
+
+            while (cs.moveToNext()) {
+                ItemData itemData = new ItemData();
+                itemData.setItemName(cs.getString(0));
+                itemData.setItemUrl(cs.getString(1));
+                itemData.setCategoryName(cs.getString(2));
+                itemData.setCategoryColor(cs.getString(4));
+                itemDataArrayList.add(itemData);
+            }
+        }
+        return itemDataArrayList;
+    }
+
+    /**
+     * メソッド名　：　selectItem
+     * 概要　：　指定された条件に合致するItemDataを全件取得する
+     *
+     */
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public ArrayList<ItemData> selectItemData(DatabaseHelper helper,String categoryName, String itemName) throws SQLException{
+
+        //Adapter初期化
+        ArrayList<ItemData> itemDataArrayList = new ArrayList<>();
+        String sql = "SELECT * FROM ItemData LEFT OUTER JOIN CategoryData ON ItemData.CategoryName = CategoryData.CategoryName WHERE ItemData.CategoryName LIKE '" + categoryName + "' AND ItemData.ItemName Like '" +itemName + "'" ;
+        //String sql = "SELECT * FROM ItemData LEFT OUTER JOIN CategoryData ON ItemData.CategoryName = CategoryData.CategoryName WHERE ItemData.CategoryName = '楽天' AND ItemData.ItemName Like '%楽天%' " ;
+
+        //データベースから登録済みのアイテムを取得し、メイン画面に表示する
+        try (SQLiteDatabase db = helper.getWritableDatabase();
+
+             Cursor cs = db.rawQuery(sql,null)){
 
             while (cs.moveToNext()) {
                 ItemData itemData = new ItemData();
@@ -86,6 +116,24 @@ public class DbAccess {
             ContentValues cv = new ContentValues();
             cv.put("ItemName", upItemName);
             cv.put("ItemUrl", upItemUrl);
+            cv.put("CategoryName",categoryName);
+            String[] params = {data};
+            //db.update(更新するテーブル,更新する情報,条件,条件に渡す値)
+            db.update("ItemData", cv, where, params);
+
+        }
+    }
+
+    /**
+     * メソッド名　：　updatedata
+     * 概要　：　updatedialogでSaveボタンを押下時に実行される
+     * 　　　　　　・DBアクセスし、ItemDataを更新する
+     *
+     */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void updateItemDataOnCategoryName(DatabaseHelper helper, String upItemName, String upItemUrl , String categoryName ,String where, String data)throws SQLException {
+        try (SQLiteDatabase db = helper.getWritableDatabase()) {
+            ContentValues cv = new ContentValues();
             cv.put("CategoryName",categoryName);
             String[] params = {data};
             //db.update(更新するテーブル,更新する情報,条件,条件に渡す値)
@@ -145,7 +193,7 @@ public class DbAccess {
         //データベースから登録済みのアイテムを取得し、メイン画面に表示する
         try (SQLiteDatabase db = helper.getWritableDatabase();
              //db.query(取得するテーブル名,取得するカラム名,条件,条件に設定する値)
-             Cursor cs = db.query("CategoryData", new String[]{"CategoryName","CategoryColor"}, null, null, null, null, null, null)) {
+             Cursor cs = db.query("CategoryData", new String[]{"CategoryName","CategoryColor"}, null, null, null, null, "CategoryColor ASC", null)) {
 
             while (cs.moveToNext()) {
                 CategoryData categoryData = new CategoryData();
@@ -172,6 +220,24 @@ public class DbAccess {
             //db.insert("books", null, cv);
             db.insertWithOnConflict("CategoryData", null, cv, SQLiteDatabase.CONFLICT_NONE);
 
+        }
+    }
+
+    /**
+     * メソッド名　：　insertDefaultCategoryData
+     * 概要　：　updatedialogでSaveボタンを押下時に実行される
+     * 　　　　　　・DBアクセスし、ItemDataを更新する
+     *
+     */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void insertDelaultCategoryData(DatabaseHelper helper) throws SQLException{
+
+        try (SQLiteDatabase db = helper.getWritableDatabase()) {
+            ContentValues cv = new ContentValues();
+            cv.put("CategoryName", "");
+            cv.put("CategoryColor", "0");
+            //db.insert("books", null, cv);
+            db.insertWithOnConflict("CategoryData", null, cv, SQLiteDatabase.CONFLICT_NONE);
         }
     }
 
@@ -209,5 +275,23 @@ public class DbAccess {
 
         }
     }
+
+    /**
+     * メソッド名　：　deleteCategorydata
+     * 概要　：　updatedialogでSaveボタンを押下時に実行される
+     * 　　　　　　・DBアクセスし、ItemDataを更新する
+     *
+     */
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void ItemSortCategory(DatabaseHelper helper, String deleteCategoryName)throws SQLException {
+        try (SQLiteDatabase db = helper.getWritableDatabase()) {
+            String[] params = {deleteCategoryName};
+            db.delete("CategoryData", "CategoryName = ?", params);
+
+        }
+    }
+
+
+
 
 }

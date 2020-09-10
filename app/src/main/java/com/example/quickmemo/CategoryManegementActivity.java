@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -79,7 +78,7 @@ public class CategoryManegementActivity extends AppCompatActivity {
                         TextView categoryNameTextView = (view.findViewById(R.id.CategoryName));
                         String beforeCategoryName = categoryNameTextView.getText().toString();
                         arg.putString("beforeCategoryName",beforeCategoryName);
-                        arg.putString("beforeCategoryColor",dbAccess.selectItemData(helper,"CategoryData", categoryColor,"CategoryName = ?",new String[]{beforeCategoryName}).get(0));
+                        arg.putString("beforeCategoryColor",dbAccess.selectData(helper,"CategoryData", categoryColor,"CategoryName = ?",new String[]{beforeCategoryName}).get(0));
                         //ダイアログ「CategoryInsertDialogFragment」を表示
                         DialogFragment dialog = new CategoryUpdateDialogFragment();
                         dialog.setArguments(arg);
@@ -168,7 +167,7 @@ public class CategoryManegementActivity extends AppCompatActivity {
     public void serchClear(){
         //ワイルドカードでItemName全件をDBから取得し、表示する
         String searchItemName = "%";
-        ArrayList<String> searchItemData = dbAccess.selectItemData(helper,"CategoryData",categoryname,"CategoryName like ?",new String[]{searchItemName});
+        ArrayList<String> searchItemData = dbAccess.selectData(helper,"CategoryData",categoryname,"CategoryName like ?",new String[]{searchItemName});
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchItemData);
         categoryList.setAdapter(adapter);
     }

@@ -67,10 +67,15 @@ public class ItemUpdateDialogFragment extends DialogFragment {
         final Spinner dialogCategoryName = (Spinner) layout.findViewById(R.id.dialogcategoryname);
 
         try{
-            //selectdataを呼び出し、  CategoryNameが全権格納されたArrayListを取得
-            ArrayList<String> categoryNameAllData = dbAccess.selectItemData(helper,"CategoryData","CategoryName",null,null);
-            //初期表示は空文字。検索時に%に置換する。
-            categoryNameAllData.add(0,"");
+
+            ArrayList<CategoryData> categoryAllData = dbAccess.selectCategoryAllData(helper);
+            ArrayList<String> categoryNameAllData = new ArrayList<String>();
+            for(CategoryData categoryData : categoryAllData){
+
+                String categoryName = categoryData.getCategoryName();
+                categoryNameAllData.add(categoryName);
+
+            }
             ArrayAdapter dialogcategorySpinnerAdapter = new ArrayAdapter<String>(getActivity(), R.layout.support_simple_spinner_dropdown_item, categoryNameAllData);
             //setAdapterを呼び出し、スピナーにアダプターをセットする
             dialogCategoryName.setAdapter(dialogcategorySpinnerAdapter);
