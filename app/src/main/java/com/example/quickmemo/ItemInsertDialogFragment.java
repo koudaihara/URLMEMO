@@ -20,6 +20,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.quickmemo.Entity.CategoryData;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -67,7 +69,7 @@ public class ItemInsertDialogFragment extends DialogFragment {
         final EditText diarogItemUrl = (EditText) layout.findViewById(R.id.dialogitemurl);
         final Spinner dialogCategoryName = (Spinner) layout.findViewById(R.id.dialogcategoryname);
 
-        //ItemUpdateActivityから呼び出された場合は、共有されたUrlをダイアログにせて設定
+        //ItemUpdateActivityから呼び出された場合は、共有されたUrlをダイアログに設定
         if(activityFlg) {
 
             //SubActivityから選択したリストのitemNameとインテントされたURLを取得

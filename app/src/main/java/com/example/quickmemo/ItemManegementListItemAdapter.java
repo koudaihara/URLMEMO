@@ -6,7 +6,10 @@ import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.example.quickmemo.Entity.ItemManegementListItem;
 
 import java.util.ArrayList;
 
@@ -43,11 +46,18 @@ public class ItemManegementListItemAdapter extends BaseAdapter {
         ItemManegementListItem itemManegementListItem = (ItemManegementListItem) getItem(position);
         if (convertView == null) {
             convertView = activity.getLayoutInflater().inflate(resource,parent, false);
-            //convertView = convertView.inflate(resource,parent,null);
         }
+        String itemUrl = itemManegementListItem.getItemUrl();
         ((TextView)convertView.findViewById(R.id.ItemName)).setText(itemManegementListItem.getItemName());
-        ((TextView)convertView.findViewById(R.id.ItemUrl)).setText(itemManegementListItem.getItemUrl());
+        ((TextView)convertView.findViewById(R.id.ItemUrl)).setText(itemUrl);
         ((TextView)convertView.findViewById(R.id.CategoryName)).setText(itemManegementListItem.getCategoryName());
+        //URLが設定されていない場合URLアイコンを非表示
+        if(itemUrl.equals("")){
+            ((ImageView)convertView.findViewById(R.id.urlicon)).setVisibility(View.INVISIBLE);
+        }else{
+            ((ImageView)convertView.findViewById(R.id.urlicon)).setVisibility(View.VISIBLE);
+        }
+        //CategoryColorを設定
         int resouceId = Integer.parseInt(itemManegementListItem.getCategoryColor());
         switch (resouceId) {
             case 1:
@@ -77,9 +87,6 @@ public class ItemManegementListItemAdapter extends BaseAdapter {
             case 9:
                 convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(0, 0, 0));
                 break;
-
-
-
         }
         return convertView;
     }

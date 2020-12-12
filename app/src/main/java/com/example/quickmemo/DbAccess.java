@@ -8,7 +8,8 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
-import com.example.quickmemo.CategoryData;
+import com.example.quickmemo.Entity.CategoryData;
+import com.example.quickmemo.Entity.ItemData;
 
 import java.util.ArrayList;
 
@@ -84,7 +85,7 @@ public class DbAccess {
 
         //Adapter初期化
         ArrayList<ItemData> itemDataArrayList = new ArrayList<>();
-        String sql = "SELECT * FROM ItemData LEFT OUTER JOIN CategoryData ON ItemData.CategoryName = CategoryData.CategoryName WHERE ItemData.CategoryName LIKE '" + categoryName + "' AND ItemData.ItemName Like '" +itemName + "'" ;
+        String sql = "SELECT * FROM ItemData LEFT OUTER JOIN CategoryData ON ItemData.CategoryName = CategoryData.CategoryName WHERE ItemData.CategoryName LIKE '" + categoryName + "' AND ItemData.ItemName Like '" +itemName + "' ORDER BY CategoryData.CategoryColor ASC";
         //String sql = "SELECT * FROM ItemData LEFT OUTER JOIN CategoryData ON ItemData.CategoryName = CategoryData.CategoryName WHERE ItemData.CategoryName = '楽天' AND ItemData.ItemName Like '%楽天%' " ;
 
         //データベースから登録済みのアイテムを取得し、メイン画面に表示する
@@ -125,17 +126,17 @@ public class DbAccess {
     }
 
     /**
-     * メソッド名　：　updatedata
-     * 概要　：　updatedialogでSaveボタンを押下時に実行される
-     * 　　　　　　・DBアクセスし、ItemDataを更新する
+     * メソッド名　：　updateItemData
+     * 概要　：　CategoryUpdatedialogでCategoryname更新時に実行される
+     * 　　　　　　・変更前のCategoruNameに紐づくItemDataのCategoryNameを更新する
      *
      */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void updateItemDataOnCategoryName(DatabaseHelper helper, String upItemName, String upItemUrl , String categoryName ,String where, String data)throws SQLException {
+    public void updateItemDataOnCategoryName(DatabaseHelper helper,String updateCategoryName ,String where, String beforeCategoryName)throws SQLException {
         try (SQLiteDatabase db = helper.getWritableDatabase()) {
             ContentValues cv = new ContentValues();
-            cv.put("CategoryName",categoryName);
-            String[] params = {data};
+            cv.put("CategoryName",updateCategoryName);
+            String[] params = {beforeCategoryName};
             //db.update(更新するテーブル,更新する情報,条件,条件に渡す値)
             db.update("ItemData", cv, where, params);
 
@@ -143,7 +144,7 @@ public class DbAccess {
     }
 
     /**
-     * メソッド名　：　insertdata
+     * メソッド名　：　insertItemData
      * 概要　：　updatedialogでSaveボタンを押下時に実行される
      * 　　　　　　・DBアクセスし、ItemDataを更新する
      *
@@ -163,7 +164,7 @@ public class DbAccess {
 
 
     /**
-     * メソッド名　：　deletedata
+     * メソッド名　：　deleteItemdata
      * 概要　：　updatedialogでSaveボタンを押下時に実行される
      * 　　　　　　・DBアクセスし、ItemDataを更新する
      *
@@ -234,7 +235,7 @@ public class DbAccess {
 
         try (SQLiteDatabase db = helper.getWritableDatabase()) {
             ContentValues cv = new ContentValues();
-            cv.put("CategoryName", "");
+            cv.put("CategoryName", "未設定");
             cv.put("CategoryColor", "0");
             //db.insert("books", null, cv);
             db.insertWithOnConflict("CategoryData", null, cv, SQLiteDatabase.CONFLICT_NONE);

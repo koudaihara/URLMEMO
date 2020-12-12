@@ -1,10 +1,19 @@
 package com.example.quickmemo;
 
+import com.example.quickmemo.Entity.CategoryData;
+import com.example.quickmemo.Entity.ItemData;
+import com.example.quickmemo.Entity.ItemManegementListItem;
+
 import java.util.ArrayList;
 import java.util.Random;
 
 public class DataConverter {
 
+    /**
+     *
+     *ItemDataからItemManegementListItem型に変換
+     *
+     */
     public ArrayList<ItemManegementListItem> ItemManegementListItemConverter(ArrayList<ItemData> itemdata){
 
         ArrayList<ItemManegementListItem> itemManegementListItems = new ArrayList<ItemManegementListItem>();
@@ -24,7 +33,11 @@ public class DataConverter {
         return itemManegementListItems;
 
     }
-
+    /**
+     *
+     * ラジオボタンID（リソースID）からカテゴリーカラー（DB値）に変換
+     *
+     */
     public String radioIdtoCategoryColorConverter(int radioId){
 
         String categoryColor = null;
@@ -64,6 +77,11 @@ public class DataConverter {
 
     }
 
+    /**
+     *
+     * カテゴリーカラー（DB値）からラジオボタンID（リソースID）に変換ｎ
+     *
+     */
     public int categoryColortoRadioButtonIdConverter(String categoryColor){
 
         int radioId = 0;
@@ -101,6 +119,41 @@ public class DataConverter {
 
         return radioId;
 
+    }
+
+    /**
+     * カテゴリーアップデートダイアログのスピナー初期表示用にcategoryNameAllDataのインデックスを入れ替える
+     * 引数で与えられたselectCategoryNameに合致するCategoryDataを先頭にする
+     */
+
+    public ArrayList<String> categoryDataIndexChange(ArrayList<CategoryData> categoryAllData, String selectCategoryName){
+
+        ArrayList<CategoryData> spinnercategoryNameData = new ArrayList<CategoryData>();
+        ArrayList<String> spinnerCategoryName = new ArrayList<String>();
+
+        for(CategoryData categoryData:categoryAllData){
+
+            String categoryName = categoryData.getCategoryName();
+
+            if(categoryName.equals(selectCategoryName)){
+
+                spinnercategoryNameData.add(0,categoryData);
+
+            }else{
+
+                spinnercategoryNameData.add(categoryData);
+            }
+
+        }
+
+        for(CategoryData categoryData : spinnercategoryNameData){
+
+            String categoryName = categoryData.getCategoryName();
+            spinnerCategoryName.add(categoryName);
+
+        }
+
+        return spinnerCategoryName;
     }
 
 

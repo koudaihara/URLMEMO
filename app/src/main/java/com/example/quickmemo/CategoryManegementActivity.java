@@ -9,13 +9,15 @@ import android.database.SQLException;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.quickmemo.Entity.CategoryData;
+import com.example.quickmemo.Entity.CategoryManegementListItem;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -94,7 +96,7 @@ public class CategoryManegementActivity extends AppCompatActivity {
 
             //Adapterに渡すCategotuManegementListItemのリストを作成
             ArrayList<CategoryManegementListItem> categoryManegementListItemList = new ArrayList<CategoryManegementListItem>();
-            for(int i = 0 ; i < categoryDataArrayList.size() ; i++){
+            for(int i = 1 ; i < categoryDataArrayList.size() ; i++){
 
                 CategoryManegementListItem categoryManegementListItem = new CategoryManegementListItem();
                 categoryManegementListItem.setId((new Random()).nextLong());
@@ -131,19 +133,6 @@ public class CategoryManegementActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.option_menu_category,menu);
         return true;
-    }
-    //メニューを選択時の制御
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.categorybutun:
-                itemManegementIntent = new Intent(this, ItemManegementActivity.class);
-                startActivity(itemManegementIntent);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     /**

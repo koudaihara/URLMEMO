@@ -1,13 +1,11 @@
 package com.example.quickmemo;
 
-import android.app.SearchManager;
 import android.content.Intent;
 import android.database.SQLException;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -16,6 +14,10 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
+
+import com.example.quickmemo.Entity.CategoryData;
+import com.example.quickmemo.Entity.ItemData;
+import com.example.quickmemo.Entity.ItemManegementListItem;
 
 import java.util.ArrayList;
 
@@ -27,6 +29,7 @@ public class ItemUpdateActivity extends AppCompatActivity {
     DatabaseHelper helper = null;
 
     String intentItemUrl = null;
+    String[] intentAllCategoryName = null;
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
@@ -40,6 +43,7 @@ public class ItemUpdateActivity extends AppCompatActivity {
 
         Intent subIntent = getIntent();
         intentItemUrl = subIntent.getStringExtra("intentItemUrl");
+        //intentAllCategoryName = subIntent.getStringArrayExtra("intentAllCategoryName");
         //Toast.makeText(this, String.format("こんにちは、%sさん！", intentItemUrl),Toast.LENGTH_SHORT).show();
         try{
             //selectdataを呼び出し、ItemDataが全件格納されたArrayListを取得
@@ -64,8 +68,6 @@ public class ItemUpdateActivity extends AppCompatActivity {
                 //選択されたリストビューの文字列を取得
                 TextView itemNameTextView = ((TextView) ((LinearLayout) view).findViewById(R.id.ItemName));
                 String itemName = itemNameTextView.getText().toString();
-                //TextView itemUrlTextView = ((TextView) ((LinearLayout) view).findViewById(R.id.ItemUrl));
-                //String itemUrl = itemUrlTextView.getText().toString();
                 TextView categoryNameTextView = ((TextView) ((LinearLayout) view).findViewById(R.id.CategoryName));
                 String categoryName = categoryNameTextView.getText().toString();
                 //選択されたリストビューのitemname文字列を取得
@@ -73,8 +75,10 @@ public class ItemUpdateActivity extends AppCompatActivity {
                 arg.putString("beforeItemName",itemName);
                 arg.putString("beforeItemUrl",intentItemUrl);
                 arg.putString("beforeCategoryName",categoryName);
-                //選択されたリストビューのカテゴリーを取得
-                //ダイアログのスピナーを設定
+                ArrayList<CategoryData> categoryAllData = dbAccess.selectCategoryAllData(helper);
+                ArrayList<String> spinnerCategoryAllData = new DataConverter().categoryDataIndexChange(categoryAllData,categoryName);
+                String[] spinnerCategoryNameAllData = spinnerCategoryAllData.toArray(new String[0]);
+                arg.putStringArray("categoryNameAllData",spinnerCategoryNameAllData);
 
 
                 //ダイアログ「AddDialogFragment」を生成

@@ -24,6 +24,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.quickmemo.Entity.CategoryData;
+import com.example.quickmemo.Entity.ItemData;
+import com.example.quickmemo.Entity.ItemManegementListItem;
+
 import java.util.ArrayList;
 
 public class ItemManegementActivity extends AppCompatActivity {
@@ -47,6 +51,9 @@ public class ItemManegementActivity extends AppCompatActivity {
     Intent getIntent = null;
     Intent updateIntent = null;
     Intent categoryManegement = null;
+    Intent itemShare = null;
+    ArrayList<CategoryData> categoryAllData = null;
+    ArrayList<String> categoryNameAllData = null;
 
 
     /**
@@ -64,14 +71,19 @@ public class ItemManegementActivity extends AppCompatActivity {
         //DB削除
         //deleteDatabase("sample.sqlite");
 
+        /**
+         *
+         * 暗黙的インテントによって呼び出された場合は、ItemUpdateActivtyに遷移
+         *
+         */
 
-        //暗黙的インテントによって呼び出された場合は、ItemUpdateActivtyに遷移
         getIntent = getIntent();
         if (getIntent.getStringExtra(Intent.EXTRA_TEXT) != null){
 
             String intentItemUrl = getIntent.getStringExtra(Intent.EXTRA_TEXT);
             updateIntent = new Intent(this, ItemUpdateActivity.class);
             updateIntent.putExtra("intentItemUrl",intentItemUrl);
+            //updateIntent.putExtra("intentAllCategoryName",categoryNameAllData);
             //updateIntent.putExtra("intentItemList",intentItemList);
             startActivity(updateIntent);
 
@@ -80,7 +92,6 @@ public class ItemManegementActivity extends AppCompatActivity {
         /**
          * 変数の初期化
          */
-        //DbAccessをインスタンスを初期化
         dbAccess = new DbAccess();
         itemList = findViewById(R.id.itemList);
         serchCategoryNameSpinner = findViewById(R.id.searchcategoryname);
@@ -89,7 +100,9 @@ public class ItemManegementActivity extends AppCompatActivity {
         helper = new DatabaseHelper(this);
         ItemManegementListItemAdapter itemListAdapter = null;
         ArrayAdapter<String> categorySpinnerAdapter = null;
-        final ArrayAdapter<String> dialogcategorySpinnerAdapter = null;
+        categoryAllData = new ArrayList<CategoryData>();
+        categoryNameAllData = new ArrayList<String>();
+
 
         /**
          * DBに値がない場合カテゴリーにCategoryName""CategoryColor0を追加
@@ -130,15 +143,14 @@ public class ItemManegementActivity extends AppCompatActivity {
          */
         try{
             //selectdataを呼び出し、  CategoryNameが全件格納されたArrayListを取得
-            ArrayList<CategoryData> categoryAllData = dbAccess.selectCategoryAllData(helper);
-            ArrayList<String> categoryNameAllData = new ArrayList<String>();
+            categoryAllData = dbAccess.selectCategoryAllData(helper);
             for(CategoryData categoryData : categoryAllData){
 
                 String categoryName = categoryData.getCategoryName();
                 categoryNameAllData.add(categoryName);
 
             }
-            //categoryNameAllData.add(0,"");
+            categoryNameAllData.add(0,"全カテゴリ");
             categorySpinnerAdapter = new ArrayAdapter<String>(this, R.layout.support_simple_spinner_dropdown_item, categoryNameAllData);
             //setAdapterを呼び出し、スピナーにアダプターをセットする
             serchCategoryNameSpinner.setAdapter(categorySpinnerAdapter);
@@ -150,6 +162,7 @@ public class ItemManegementActivity extends AppCompatActivity {
         /**
          *  アイテム表示用リストビューに押下の検索イベントを追加
          */
+        //itemList.setScrollingCacheEnabled(false);
 
         itemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -197,6 +210,9 @@ public class ItemManegementActivity extends AppCompatActivity {
                     arg.putString("beforeItemName",itemName);
                     arg.putString("beforeItemUrl",itemUrl);
                     arg.putString("beforeCategoryName",categoryName);
+                    ArrayList<String> spinnerCategoryAllData = new DataConverter().categoryDataIndexChange(categoryAllData,categoryName);
+                    String[] spinnerCategoryNameAllData = spinnerCategoryAllData.toArray(new String[0]);
+                    arg.putStringArray("categoryNameAllData",spinnerCategoryNameAllData);
                     //選択されたリストビューのカテゴリーを取得
                     //ダイアログのスピナーを設定
 
@@ -211,6 +227,27 @@ public class ItemManegementActivity extends AppCompatActivity {
             }
         );
 
+        // 検索用カテゴリースピナーにリスナーを設定
+        serchCategoryNameSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            //　アイテムが選択された時
+            @Override
+            public void onItemSelected(AdapterView<?> parent,
+                                       View view, int position, long id) {
+ /*               if(serchCategoryNameSpinner.isFocusable() == false){
+                    serchCategoryNameSpinner.setFocusable(true);
+                }else {
+                    onSeach();
+                }*/
+                onSeach(serchCategoryNameSpinner);
+
+            }
+
+            //　アイテムが選択されなかった
+            public void onNothingSelected(AdapterView<?> parent) {
+                //
+            }
+        });
+        //serchCategoryNameSpinner.setFocusable(false);
 
         /**
          *検索用EditTextにイベントを設定
@@ -231,13 +268,9 @@ public class ItemManegementActivity extends AppCompatActivity {
 
                     return true;
                 }
-
                 return false;
             }
         });
-
-
-
     }
 
     /**
@@ -256,8 +289,6 @@ public class ItemManegementActivity extends AppCompatActivity {
         return true;
     }
 
-
-
     /**
      *画面遷移ボタン制御
      */
@@ -265,9 +296,9 @@ public class ItemManegementActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.categorybutun:
-                categoryManegement = new Intent(this, CategoryManegementActivity.class);
-                startActivity(categoryManegement);
+            case R.id.sherebutun:
+                itemShare = new Intent(this, ItemShareActivity.class);
+                startActivity(itemShare);
                 break;
             default:
                 break;
@@ -275,9 +306,6 @@ public class ItemManegementActivity extends AppCompatActivity {
 
                 return super.onOptionsItemSelected(item);
     }
-
-
-
 
     /**
      * メソッド名　：　onClick
@@ -304,20 +332,29 @@ public class ItemManegementActivity extends AppCompatActivity {
         Spinner searchCategorySpinner = findViewById(R.id.searchcategoryname);
         String searchItemName = "%" + searchItemNameEdit.getText().toString() + "%";
         String searchCategoryName = searchCategorySpinner.getSelectedItem().toString();
-        if(searchCategoryName.equals("")){
-            searchCategoryName = "%%";
+        ArrayList<ItemData> searchItemDatas = new ArrayList<ItemData>();
+        if(searchCategoryName.equals("全カテゴリ")){
+
+            if(searchItemName.equals("%%")) {
+                //カテゴリーが空白、アイテムネームが空白の場合
+                searchItemDatas = dbAccess.selectItemAllData(helper);
+
+            }else {
+                //カテゴリーが空白、アイテムネームにテキストがある場合
+                searchItemDatas = dbAccess.selectItemData(helper,"%%",searchItemName);
+
+            }
+
+        }else {
+                //カテゴリーが選択されている場合
+                searchItemDatas = dbAccess.selectItemData(helper,searchCategoryName,searchItemName);
+
         }
 
-        //選択されたリストビューのItemNameを条件に、DBからItemUrlを取得する
-        ArrayList<ItemData> searchItemDatas = dbAccess.selectItemData(helper,searchCategoryName,searchItemName);
         ArrayList<ItemManegementListItem> serchItemManegementListItems = new DataConverter().ItemManegementListItemConverter(searchItemDatas);
         ItemManegementListItemAdapter serchItemListAdapter = new ItemManegementListItemAdapter(this,serchItemManegementListItems, R.layout.itemmanegementlistitem);
         //setAdapterを呼び出し、リストビューにアダプターをセットする
         itemList.setAdapter(serchItemListAdapter);
-
-        //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, searchItemData);
-        //setAdapterを呼び出し、リストビューにアダプターをセットする
-        //itemList.setAdapter(adapter);
 
     }
 
@@ -331,14 +368,15 @@ public class ItemManegementActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void serchClear(View view){
+        //検索テキストボックスの入力値を削除する
+        serchItemNameEditText.getEditableText().clear();
+        serchCategoryNameSpinner.setSelection(0);
         ArrayList<ItemData> itemNameAllData = dbAccess.selectItemAllData(helper);
         ArrayList<ItemManegementListItem> itemManegementListItems = new ArrayList<ItemManegementListItem>();
         itemManegementListItems = new DataConverter().ItemManegementListItemConverter(itemNameAllData);
         ItemManegementListItemAdapter itemListAdapter = new ItemManegementListItemAdapter(this,itemManegementListItems, R.layout.itemmanegementlistitem);
         itemList.setAdapter(itemListAdapter);
-        //検索テキストボックスの入力値を削除する
-        serchItemNameEditText.getEditableText().clear();
-        serchCategoryNameSpinner.setSelection(0);
+
     }
     /**
      * メソッド名　：　moveCategory
@@ -349,9 +387,9 @@ public class ItemManegementActivity extends AppCompatActivity {
     public void moveCategoryManegementActivity(View view){
         //CategoryManegementActivityに遷移する
         //暗黙的インテントで、検索を実行
-        categoryManegement = new Intent(this,CategoryManegementActivity.class);
-        startActivity(categoryManegement);
-        categoryManegement = null;
+        itemShare = new Intent(this, CategoryManegementActivity.class);
+        startActivity(itemShare);
+        itemShare = null;
     }
 }
 

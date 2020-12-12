@@ -1,5 +1,6 @@
 package com.example.quickmemo;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -7,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.example.quickmemo.Entity.CategoryManegementListItem;
 
 import java.util.ArrayList;
 
@@ -37,6 +40,7 @@ public class CategoryManegementListItemAdapter extends BaseAdapter {
         return data.get(position).getId();
     }
 
+    @SuppressLint("ResourceType")
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Activity activity = (Activity) context;
@@ -48,6 +52,7 @@ public class CategoryManegementListItemAdapter extends BaseAdapter {
         ((TextView)convertView.findViewById(R.id.CategoryName)).setText(categoryManegementListItem.getCategoryName());
         int resouceId = Integer.parseInt(categoryManegementListItem.getCategoryColor());
         switch (resouceId) {
+
             case 1:
                 convertView.findViewById(R.id.CategoryColor).setBackgroundColor(Color.rgb(255, 255, 0));
                 break;

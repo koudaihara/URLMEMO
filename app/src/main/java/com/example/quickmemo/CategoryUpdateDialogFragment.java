@@ -90,8 +90,10 @@ public class CategoryUpdateDialogFragment extends DialogFragment {
                         //ダイアログに入力されているCategorynameを取得
                         String deleteCategoryName = dialogCategoryName.getText().toString();
                     try {
-                        //ondeleteメソッド呼び出し
+                        //カテゴリー削除メソッド呼び出し
                         dbAccess.deleteCategoryData(helper,deleteCategoryName);
+                        //カテゴリーに紐づくアイテム情報更新メソッド呼び出し
+                        dbAccess.updateItemDataOnCategoryName(helper,"なし","CategoryName = ?",deleteCategoryName);
                         //ダイアログに入力されているItemnameを取得
                         Toast.makeText(getActivity(),"Category Deleted",Toast.LENGTH_SHORT).show();
                     }catch (SQLException e){
@@ -115,12 +117,12 @@ public class CategoryUpdateDialogFragment extends DialogFragment {
                 String updateCategoryName = dialogCategoryName.getText().toString();
                 if(updateCategoryName.length() != 0){
                     //ダイアログに入力されている更新値を取得
-                    String updateCategoryColor = Integer.toString(dialogCategoryColorgroup.getCheckedRadioButtonId());
+                    String updateCategoryColor = new DataConverter().radioIdtoCategoryColorConverter(dialogCategoryColorgroup.getCheckedRadioButtonId());
 
                     try {
                         ///onUpdateメソッド呼び出し
                         dbAccess.updateCategoryData(helper,updateCategoryName,updateCategoryColor,"CategoryName = ?",beforeCategoryName);
-                        dbAccess.updateItemDataOnCategoryName(helper,null,null,updateCategoryName,"CategoryName = ?",beforeCategoryName);
+                        dbAccess.updateItemDataOnCategoryName(helper,updateCategoryName,"CategoryName = ?",beforeCategoryName);
                         Toast.makeText(getActivity(), "Category Updated", Toast.LENGTH_SHORT).show();
                     }catch (SQLException e){
                         Toast.makeText(getActivity(), String.format("%s is Already exists!!", updateCategoryName),Toast.LENGTH_LONG).show();

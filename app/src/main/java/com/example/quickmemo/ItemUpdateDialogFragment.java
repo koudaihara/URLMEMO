@@ -66,31 +66,18 @@ public class ItemUpdateDialogFragment extends DialogFragment {
         final EditText diarogItemUrl = (EditText) layout.findViewById(R.id.dialogitemurl);
         final Spinner dialogCategoryName = (Spinner) layout.findViewById(R.id.dialogcategoryname);
 
-        try{
-
-            ArrayList<CategoryData> categoryAllData = dbAccess.selectCategoryAllData(helper);
-            ArrayList<String> categoryNameAllData = new ArrayList<String>();
-            for(CategoryData categoryData : categoryAllData){
-
-                String categoryName = categoryData.getCategoryName();
-                categoryNameAllData.add(categoryName);
-
-            }
-            ArrayAdapter dialogcategorySpinnerAdapter = new ArrayAdapter<String>(getActivity(), R.layout.support_simple_spinner_dropdown_item, categoryNameAllData);
-            //setAdapterを呼び出し、スピナーにアダプターをセットする
-            dialogCategoryName.setAdapter(dialogcategorySpinnerAdapter);
-        }catch (
-                SQLException e){
-            Toast.makeText(getActivity(), "An error occurred!!", Toast.LENGTH_LONG)
-                    .show();
-        }
-
-
-
         //ItemmanegementActivityから選択したリストのitemNameとインテントされたURLを取得
         Bundle args = Objects.requireNonNull(getArguments());
         final String beforeItemName = args.getString("beforeItemName");
         final String beforeItemUrl = args.getString("beforeItemUrl");
+        final String[] categoryNameAllData = args.getStringArray("categoryNameAllData");
+
+
+            ArrayAdapter dialogcategorySpinnerAdapter = new ArrayAdapter<String>(getActivity(), R.layout.support_simple_spinner_dropdown_item, categoryNameAllData);
+            //setAdapterを呼び出し、スピナーにアダプターをセットする
+            dialogCategoryName.setAdapter(dialogcategorySpinnerAdapter);
+
+
 
         //updatedialogのEdittextに初期値を設定
         dialogItemName.setText(beforeItemName);
